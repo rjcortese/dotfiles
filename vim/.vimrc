@@ -86,6 +86,9 @@ Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
 Plug 'keith/swift.vim', { 'for': 'swift' }
 Plug 'cespare/vim-toml', { 'for': 'toml' }
 
+" paste from clipboard without having to toggle paste mode
+Plug 'ConradIrwin/vim-bracketed-paste'
+
 " rust stuff
 Plug 'rust-lang/rust.vim'
 
