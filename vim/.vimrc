@@ -71,6 +71,7 @@ Plug 'Valloric/YouCompleteMe', { 'do': function('BuildYCM') }
 
 " ez commenting / uncommenting
 Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-abolish'
 
 " fast folding
 Plug 'Konfekt/FastFold'
@@ -82,6 +83,7 @@ Plug 'tmhedberg/SimpylFold', { 'for': 'python' }
 Plug 'vim-scripts/indentpython.vim', { 'for': 'python' }
 
 " syntax highlighting plugs
+Plug 'evanleck/vim-svelte', { 'for': 'svelte' }
 Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
 Plug 'keith/swift.vim', { 'for': 'swift' }
 Plug 'cespare/vim-toml', { 'for': 'toml' }
@@ -200,8 +202,8 @@ au BufNewFile,BufRead *.py
     \ set fileformat=unix |
     \ let python_highlight_all = 1 " python syntax highlighting
 
-" Javascript, HTML, CSS
-au BufNewFile,BufRead *.js,*.html,*.css
+" Javascript, HTML, CSS, JSON, svelte
+au BufNewFile,BufRead *.js,*.html,*.css,*.json,*.svelte
     \ set tabstop=2 |
     \ set softtabstop=2 |
     \ set shiftwidth=2
@@ -238,6 +240,11 @@ nnoremap } }zz
 nnoremap n nzz
 nnoremap N Nzz
 nnoremap % %zz
+" and some of the same but for Visual mode
+xnoremap j jzz
+xnoremap k kzz
+xnoremap G Gzz
+
 
 " simpler movement between splits
 nnoremap <C-J> <C-W><C-J>
