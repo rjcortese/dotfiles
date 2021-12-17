@@ -185,7 +185,7 @@ source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring
 zmodload zsh/terminfo
 bindkey "$terminfo[kcuu1]" history-substring-search-up
 bindkey "$terminfo[kcud1]" history-substring-search-down
-bindkey '^[[A' history-substring-search-up			
+bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
 # Apply different settigns for different terminals
@@ -234,14 +234,33 @@ alias egrep='egrep --colour=auto'
 alias fgrep='fgrep --colour=auto'
 
 # pyenv stuff
+# the `command -v` part makes sure there is a command called `pyenv` found in PATH
 if command -v pyenv 1>/dev/null 2>&1; then
-  eval "$(pyenv init -)"
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
 fi
+export PATH="/home/rjcortese/.pyenv/bin:$PATH"
+
+# for dynamic lib (on linux)
 export PYTHON_CONFIGURE_OPTS="--enable-shared"
+# for optimized cpython
+export CFLAGS='-O2'
+
+# poetry stuff
+export PATH="$HOME/.poetry/bin:$PATH"
+
 # rust stuff
 export PATH="$HOME/.cargo/bin:$PATH"
+
 # go stuff
 export PATH="$PATH:/usr/local/go/bin"
+
 # deno stuff
-export DENO_INSTALL="/home/rjcortese/.deno"
+export DENO_INSTALL="$HOME/.deno"
 export PATH="$DENO_INSTALL/bin:$PATH"
+
+# places to look for libraries on linux
+# LD_LIBRARY_PATH is for linking at runtime
+export LD_LIBRARY_PATH="/usr/lib:/usr/lib32:/usr/lib64:/home/rjcortese/.local/lib"
+# LIBRARY_PATH is for linking at compile time (at least for gcc)
+export LIBRARY_PATH="$LD_LIBRARY_PATH"
