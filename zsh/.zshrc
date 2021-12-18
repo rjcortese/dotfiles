@@ -1,7 +1,12 @@
 # start tmux
-# if running a graphical environment
-if [[ $DISPLAY ]]; then
+# if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
+#   exec tmux
+# fi
+
+# if running a graphical environment or MacOS
+if [[ $DISPLAY || `uname` == "Darwin" ]]; then
     # If not running interactively, don't do anything
+    # funny this is running in zshrc thing and doesn't include -o interactive
     [[ $- != *i* ]] && return
     # check if tmux is installed and not already in a session
     if command -v tmux &> /dev/null && test -z "$TMUX"; then
@@ -95,9 +100,16 @@ setopt prompt_subst
 # Prompt (on left side) similar to default bash prompt, or redhat zsh prompt with colors
  #PROMPT="%(!.%{$fg[red]%}[%n@%m %1~]%{$reset_color%}# .%{$fg[green]%}[%n@%m %1~]%{$reset_color%}$ "
 # Maia prompt
-PROMPT="%B%{$fg[cyan]%}%(4~|%-1~/.../%2~|%~)%u%b >%{$fg[cyan]%}>%B%(?.%{$fg[cyan]%}.%{$fg[red]%})>%{$reset_color%}%b " # Print some system information when the shell is first started
+PROMPT="%B%{$fg[cyan]%}%(4~|%-1~/.../%2~|%~)%u%b >%{$fg[cyan]%}>%B%(?.%{$fg[cyan]%}.%{$fg[red]%})>%{$reset_color%}%b "
+
+# Print some system information when the shell is first started
 # Print a greeting message when shell is started
-echo $USER@$HOST  $(uname -srm) $(lsb_release -rcs)
+if [[ `uname` == "Darwin" ]]; then
+    echo $USER@$HOST $(uname -srm) $(sw_vers | awk '{printf "%s ", $2} END {print ""}')
+else
+    echo $USER@$HOST  $(uname -srm) $(lsb_release -rcs)
+fi
+
 ## Prompt on right side:
 #  - shows status of git when in git repository (code adapted from https://techanic.net/2012/12/30/my_git_prompt_for_zsh.html)
 #  - shows exit status of previous command (if previous command finished with an error)
@@ -176,11 +188,48 @@ export LESS_TERMCAP_us=$'\E[01;36m'
 export LESS=-r
 
 
+
+# try to install needed plugins if we don't have them:
+# if [[ `uname` == "Darwin" ]]; then
+#     if command -v brew &> /dev/null; then
+#         brew install zsh-syntax-highlighting
+#         brew install zsh-history-substring-search
+#         brew install zsh-autosuggestions
+#     fi
+# else
+#     # TODO install on linux
+# fi
+
 ## Plugins section: Enable fish style features
 # Use syntax highlighting
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+#   set correct path
+if [[ `uname` == "Darwin" ]]; then
+    ZSH_SYNTAX_HIGHLIGHTING="/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+else
+    ZSH_SYNTAX_HIGHLIGHTING="/usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
+#   source it if it exists
+if [[ ! -f "$ZSH_SYNTAX_HIGHLIGHTING" ]]; then
+    echo "NO zsh-syntax-highlighting.zsh found!"
+else
+    source "$ZSH_SYNTAX_HIGHLIGHTING"
+fi
+
 # Use history substring search
-source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+#   set correct path
+if [[ `uname` == "Darwin" ]]; then
+    ZSH_HISTORY_SUBSTRING_SEARCH="/usr/local/share/zsh-history-substring-search/zsh-history-substring-search.zsh"
+else
+    ZSH_HISTORY_SUBSTRING_SEARCH="/usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh"
+fi
+#   source it if it exists
+if [[ ! -f "$ZSH_HISTORY_SUBSTRING_SEARCH" ]]; then
+    echo "NO zsh-history-substring-search.zsh found!"
+else
+    source "$ZSH_HISTORY_SUBSTRING_SEARCH"
+fi
+
+
 # bind UP and DOWN arrow keys to history substring search
 zmodload zsh/terminfo
 bindkey "$terminfo[kcuu1]" history-substring-search-up
@@ -189,13 +238,16 @@ bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
 # Apply different settigns for different terminals
-case $(basename "$(cat "/proc/$PPID/comm")") in
-  login)
-    	RPROMPT="%{$fg[red]%} %(?..[%?])" 
-    	alias x='startx ~/.xinitrc'      # Type name of desired desktop after x, xinitrc is configured for it
-    ;;
+# /proc/$PPID/comm is the name of the process
+# basename strips up to and including the last '/'
+  # case $(basename "$(cat "/proc/$PPID/comm")") in
+# # ...so this is some kind of hacky way to identify a login shell
+  # login)
+  #   	RPROMPT="%{$fg[red]%} %(?..[%?])" 
+  #   	alias x='startx ~/.xinitrc'      # Type name of desired desktop after x, xinitrc is configured for it
+  #   ;;
 #  'tmux: server')
-#        RPROMPT='$(git_prompt_string)'
+#       RPROMPT='$(git_prompt_string)'
 #		## Base16 Shell color themes.
 #		#possible themes: 3024, apathy, ashes, atelierdune, atelierforest, atelierhearth,
 #		#atelierseaside, bespin, brewer, chalk, codeschool, colors, default, eighties, 
@@ -212,14 +264,23 @@ case $(basename "$(cat "/proc/$PPID/comm")") in
 #		ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
 #  		ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
 #     ;;
-  *)
-        RPROMPT='$(git_prompt_string)'
-		# Use autosuggestion
-		source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-		ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
-  		ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
-    ;;
-esac
+  # *)
+RPROMPT='$(git_prompt_string)'
+# Use autosuggestion
+if [[ `uname` == "Darwin" ]]; then
+    ZSH_AUTOSUGGESTIONS="/usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+else
+    ZSH_AUTOSUGGESTIONS="/usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+fi
+if [[ -f "$ZSH_AUTOSUGGESTIONS" ]]; then
+    source "$ZSH_AUTOSUGGESTIONS"
+    ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+else
+    echo "No zsh-autosuggestions found!"
+fi
+    # ;;
+# esac
 
 #                /\
 # default stuff /  \
@@ -235,15 +296,19 @@ alias fgrep='fgrep --colour=auto'
 
 # pyenv stuff
 # the `command -v` part makes sure there is a command called `pyenv` found in PATH
-if command -v pyenv 1>/dev/null 2>&1; then
+if command -v pyenv &> /dev/null; then
     eval "$(pyenv init -)"
     eval "$(pyenv virtualenv-init -)"
 fi
 export PATH="/home/rjcortese/.pyenv/bin:$PATH"
 
-# for dynamic lib (on linux)
+
+# things for building CPython
+# build CPython with framework support (OS X)
+export PYTHON_CONFIGURE_OPTS="--enable-framework"
+# build CPython as dynamic lib (linux)
 export PYTHON_CONFIGURE_OPTS="--enable-shared"
-# for optimized cpython
+# for optimized CPython
 export CFLAGS='-O2'
 
 # poetry stuff
