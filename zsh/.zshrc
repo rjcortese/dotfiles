@@ -295,24 +295,23 @@ alias egrep='egrep --colour=auto'
 alias fgrep='fgrep --colour=auto'
 
 # pyenv stuff
+export PATH="$HOME/.pyenv/bin:$PATH"
 # the `command -v` part makes sure there is a command called `pyenv` found in PATH
 if command -v pyenv &> /dev/null; then
-    eval "$(pyenv init -)"
+    eval "$(pyenv init --path)"
     eval "$(pyenv virtualenv-init -)"
 fi
-export PATH="/home/rjcortese/.pyenv/bin:$PATH"
 
-
-# things for building CPython
+# things for building CPython, uncomment when time to install new python versions with pyenv
 # build CPython with framework support (OS X)
-export PYTHON_CONFIGURE_OPTS="--enable-framework"
+#export PYTHON_CONFIGURE_OPTS="--enable-framework"
 # build CPython as dynamic lib (linux)
-export PYTHON_CONFIGURE_OPTS="--enable-shared"
+#export PYTHON_CONFIGURE_OPTS="--enable-shared"
 # for optimized CPython
-export CFLAGS='-O2'
+#export CFLAGS='-O2'
 
 # poetry stuff
-export PATH="$HOME/.poetry/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 
 # rust stuff
 export PATH="$HOME/.cargo/bin:$PATH"
@@ -324,8 +323,8 @@ export PATH="$PATH:/usr/local/go/bin"
 export DENO_INSTALL="$HOME/.deno"
 export PATH="$DENO_INSTALL/bin:$PATH"
 
-# places to look for libraries on linux
+# places to look for libraries on linux, uncomment if need to build some C stuff...
 # LD_LIBRARY_PATH is for linking at runtime
-export LD_LIBRARY_PATH="/usr/lib:/usr/lib32:/usr/lib64:/home/rjcortese/.local/lib"
+#export LD_LIBRARY_PATH="/usr/lib:/usr/lib32:/usr/lib64:/home/rjcortese/.local/lib"
 # LIBRARY_PATH is for linking at compile time (at least for gcc)
-export LIBRARY_PATH="$LD_LIBRARY_PATH"
+#export LIBRARY_PATH="$LD_LIBRARY_PATH"
