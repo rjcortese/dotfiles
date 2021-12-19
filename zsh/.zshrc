@@ -1,15 +1,21 @@
+# prevent duplicates in PATH
+typeset -U PATH path
+
+# determine OS
+[[ `uname` == Darwin ]] && local MacOS
+
 # start tmux
+#
+# different ways to determine if tmux should be started:
 # if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
 #   exec tmux
 # fi
-
-# prevent duplicates in PATH
-typeset -U PATH
-
+#
 # if running a graphical environment or MacOS
-if [[ $DISPLAY || `uname` == "Darwin" ]]; then
+if [[ $DISPLAY || -v MacOS ]]; then
     # If not running interactively, don't do anything
-    # funny this is running in zshrc thing and doesn't include -o interactive
+    # another way to determine if interactive shell on zsh
+    # [[ -o interactive ]]
     [[ $- != *i* ]] && return
     # check if tmux is installed and not already in a session
     if command -v tmux &> /dev/null && test -z "$TMUX"; then
@@ -22,17 +28,9 @@ if [[ $DISPLAY || `uname` == "Darwin" ]]; then
     done
 fi
 
-#                      /\
-# rjcortese additions /  \
-#
-# default stuff \  /
-#                \/
-#
-
-
 ## Options section
-unsetopt correct                                                # Auto correct mistakes, unset by rjcortese
-unsetopt nomatch                                                # Added by rjcortese
+unsetopt correct                                                # no autocorrection
+unsetopt nomatch                                                # 
 setopt extendedglob                                             # Extended globbing. Allows using regular expressions with *
 setopt nocaseglob                                               # Case insensitive globbing
 setopt rcexpandparam                                            # Array expension with parameters
@@ -50,11 +48,17 @@ zstyle ':completion:*' rehash true                              # automatically 
 zstyle ':completion:*' accept-exact '*(N)'
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache
+
 HISTFILE=~/.zhistory
 HISTSIZE=1000
 SAVEHIST=500
-export EDITOR=/usr/bin/vim
-#export VISUAL=/usr/bin/nano
+
+if [[ -v MacOS ]]; then
+    # on MacOS, want to use the vim as installed by homebrew
+    export EDITOR=/usr/local/bin/vim
+else
+    export EDITOR=/usr/bin/vim
+fi
 WORDCHARS=${WORDCHARS//\/[&.;]}                                 # Don't consider certain characters part of the word
 
 
@@ -87,12 +91,15 @@ bindkey '^[[Z' undo                                             # Shift+tab undo
 
 ## Alias section 
 alias cp="cp -i"                                                # Confirm before overwriting something
-alias open="xdg-open"
-alias df='df -h'                                                # Human-readable sizes
-alias free='free -m'                                            # Show sizes in MB
-alias gitu='git add . && git commit && git push'
+alias ls='ls --color=auto'
+alias grep='grep --colour=auto'
+alias egrep='egrep --colour=auto'
+alias fgrep='fgrep --colour=auto'
+# MacOS has builtin open command
+[[ ! -v MacOS ]] && alias open="xdg-open"
 
-# Theming section  
+
+# Theming section
 autoload -U compinit colors zcalc
 compinit -d
 colors
@@ -100,18 +107,9 @@ colors
 # enable substitution for prompt
 setopt prompt_subst
 
-# Prompt (on left side) similar to default bash prompt, or redhat zsh prompt with colors
- #PROMPT="%(!.%{$fg[red]%}[%n@%m %1~]%{$reset_color%}# .%{$fg[green]%}[%n@%m %1~]%{$reset_color%}$ "
-# Maia prompt
-PROMPT="%B%{$fg[cyan]%}%(4~|%-1~/.../%2~|%~)%u%b >%{$fg[cyan]%}>%B%(?.%{$fg[cyan]%}.%{$fg[red]%})>%{$reset_color%}%b "
 
-# Print some system information when the shell is first started
-# Print a greeting message when shell is started
-if [[ `uname` == "Darwin" ]]; then
-    echo $USER@$HOST $(uname -srm) $(sw_vers | awk '{printf "%s ", $2} END {print ""}')
-else
-    echo $USER@$HOST  $(uname -srm) $(lsb_release -rcs)
-fi
+# Set our Left Promt to the Maia prompt
+PROMPT="%B%{$fg[cyan]%}%(4~|%-1~/.../%2~|%~)%u%b >%{$fg[cyan]%}>%B%(?.%{$fg[cyan]%}.%{$fg[red]%})>%{$reset_color%}%b "
 
 ## Prompt on right side:
 #  - shows status of git when in git repository (code adapted from https://techanic.net/2012/12/30/my_git_prompt_for_zsh.html)
@@ -174,10 +172,15 @@ git_prompt_string() {
   [ ! -n "$git_where" ] && echo "%{$fg[red]%} %(?..[%?])"
 }
 
-# Right prompt with exit status of previous command if not successful
- #RPROMPT="%{$fg[red]%} %(?..[%?])" 
-# Right prompt with exit status of previous command marked with ✓ or ✗
- #RPROMPT="%(?.%{$fg[green]%}✓ %{$reset_color%}.%{$fg[red]%}✗ %{$reset_color%})"
+RPROMPT='$(git_prompt_string)'
+
+
+# Print some system information when the shell is first started
+if [[ -v MacOS ]]; then
+    echo $USER@$HOST $(uname -srm) $(sw_vers | awk '{printf "%s ", $2} END {print ""}')
+else
+    echo $USER@$HOST  $(uname -srm) $(lsb_release -rcs)
+fi
 
 
 # Color man pages
@@ -192,8 +195,10 @@ export LESS=-r
 
 
 
+## Plugins section:
+
 # try to install needed plugins if we don't have them:
-# if [[ `uname` == "Darwin" ]]; then
+# if [[ -v MacOS ]]; then
 #     if command -v brew &> /dev/null; then
 #         brew install zsh-syntax-highlighting
 #         brew install zsh-history-substring-search
@@ -203,74 +208,40 @@ export LESS=-r
 #     # TODO install on linux
 # fi
 
-## Plugins section: Enable fish style features
 # Use syntax highlighting
-#   set correct path
-if [[ `uname` == "Darwin" ]]; then
+if [[ -v MacOS ]]; then
     ZSH_SYNTAX_HIGHLIGHTING="/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 else
     ZSH_SYNTAX_HIGHLIGHTING="/usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
-#   source it if it exists
-if [[ ! -f "$ZSH_SYNTAX_HIGHLIGHTING" ]]; then
-    echo "NO zsh-syntax-highlighting.zsh found!"
-else
+if [[ -f "$ZSH_SYNTAX_HIGHLIGHTING" ]]; then
     source "$ZSH_SYNTAX_HIGHLIGHTING"
+else
+    echo "NO zsh-syntax-highlighting.zsh found!"
 fi
 
 # Use history substring search
-#   set correct path
-if [[ `uname` == "Darwin" ]]; then
+if [[ -v MacOS ]]; then
     ZSH_HISTORY_SUBSTRING_SEARCH="/usr/local/share/zsh-history-substring-search/zsh-history-substring-search.zsh"
 else
     ZSH_HISTORY_SUBSTRING_SEARCH="/usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh"
 fi
-#   source it if it exists
-if [[ ! -f "$ZSH_HISTORY_SUBSTRING_SEARCH" ]]; then
-    echo "NO zsh-history-substring-search.zsh found!"
-else
+if [[ -f "$ZSH_HISTORY_SUBSTRING_SEARCH" ]]; then
     source "$ZSH_HISTORY_SUBSTRING_SEARCH"
+
+    # bind UP and DOWN arrow keys to history substring search
+    zmodload zsh/terminfo
+    bindkey "$terminfo[kcuu1]" history-substring-search-up
+    bindkey "$terminfo[kcud1]" history-substring-search-down
+    bindkey '^[[A' history-substring-search-up
+    bindkey '^[[B' history-substring-search-down
+
+else
+    echo "NO zsh-history-substring-search.zsh found!"
 fi
 
-
-# bind UP and DOWN arrow keys to history substring search
-zmodload zsh/terminfo
-bindkey "$terminfo[kcuu1]" history-substring-search-up
-bindkey "$terminfo[kcud1]" history-substring-search-down
-bindkey '^[[A' history-substring-search-up
-bindkey '^[[B' history-substring-search-down
-
-# Apply different settigns for different terminals
-# /proc/$PPID/comm is the name of the process
-# basename strips up to and including the last '/'
-  # case $(basename "$(cat "/proc/$PPID/comm")") in
-# # ...so this is some kind of hacky way to identify a login shell
-  # login)
-  #   	RPROMPT="%{$fg[red]%} %(?..[%?])" 
-  #   	alias x='startx ~/.xinitrc'      # Type name of desired desktop after x, xinitrc is configured for it
-  #   ;;
-#  'tmux: server')
-#       RPROMPT='$(git_prompt_string)'
-#		## Base16 Shell color themes.
-#		#possible themes: 3024, apathy, ashes, atelierdune, atelierforest, atelierhearth,
-#		#atelierseaside, bespin, brewer, chalk, codeschool, colors, default, eighties, 
-#		#embers, flat, google, grayscale, greenscreen, harmonic16, isotope, londontube,
-#		#marrakesh, mocha, monokai, ocean, paraiso, pop (dark only), railscasts, shapesifter,
-#		#solarized, summerfruit, tomorrow, twilight
-#		#theme="eighties"
-#		#Possible variants: dark and light
-#		#shade="dark"
-#		#BASE16_SHELL="/usr/share/zsh/scripts/base16-shell/base16-$theme.$shade.sh"
-#		#[[ -s $BASE16_SHELL ]] && source $BASE16_SHELL
-#		# Use autosuggestion
-#		source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-#		ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
-#  		ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
-#     ;;
-  # *)
-RPROMPT='$(git_prompt_string)'
 # Use autosuggestion
-if [[ `uname` == "Darwin" ]]; then
+if [[ -v MacOS ]]; then
     ZSH_AUTOSUGGESTIONS="/usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 else
     ZSH_AUTOSUGGESTIONS="/usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
@@ -282,24 +253,11 @@ if [[ -f "$ZSH_AUTOSUGGESTIONS" ]]; then
 else
     echo "No zsh-autosuggestions found!"
 fi
-    # ;;
-# esac
 
-#                /\
-# default stuff /  \
-#
-# rjcortese additions \  /
-#                      \/
-#
 
-alias ls='ls --color=auto'
-alias grep='grep --colour=auto'
-alias egrep='egrep --colour=auto'
-alias fgrep='fgrep --colour=auto'
-
-# pyenv stuff
+## PATH section and settings specific to certain programs
+# pyenv
 export PATH="$HOME/.pyenv/bin:$PATH"
-# the `command -v` part makes sure there is a command called `pyenv` found in PATH
 if command -v pyenv &> /dev/null; then
     eval "$(pyenv init --path)"
     eval "$(pyenv virtualenv-init -)"
@@ -313,16 +271,16 @@ fi
 # for optimized CPython
 #export CFLAGS='-O2'
 
-# poetry stuff
+# poetry
 export PATH="$HOME/.local/bin:$PATH"
 
-# rust stuff
+# rust
 export PATH="$HOME/.cargo/bin:$PATH"
 
-# go stuff
+# go
 export PATH="$PATH:/usr/local/go/bin"
 
-# deno stuff
+# deno
 export DENO_INSTALL="$HOME/.deno"
 export PATH="$DENO_INSTALL/bin:$PATH"
 
