@@ -3,6 +3,9 @@
 #   exec tmux
 # fi
 
+# prevent duplicates in PATH
+typeset -U PATH
+
 # if running a graphical environment or MacOS
 if [[ $DISPLAY || `uname` == "Darwin" ]]; then
     # If not running interactively, don't do anything
