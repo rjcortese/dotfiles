@@ -284,8 +284,22 @@ export PATH="$PATH:/usr/local/go/bin"
 export DENO_INSTALL="$HOME/.deno"
 export PATH="$DENO_INSTALL/bin:$PATH"
 
+# java
+#export PATH="/usr/local/opt/openjdk@8/bin:$PATH"
+
+# nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
 # places to look for libraries on linux, uncomment if need to build some C stuff...
 # LD_LIBRARY_PATH is for linking at runtime
 #export LD_LIBRARY_PATH="/usr/lib:/usr/lib32:/usr/lib64:/home/rjcortese/.local/lib"
 # LIBRARY_PATH is for linking at compile time (at least for gcc)
 #export LIBRARY_PATH="$LD_LIBRARY_PATH"
+#
+# places to look for libraries on MacOS, uncomment if need to build some C stuff...
+# LD_LIBRARY_PATH is for linking at runtime
+# export LD_LIBRARY_PATH="/usr/local/lib"
+# -I/usr/local/include -L/usr/local/lib -lpostal
+

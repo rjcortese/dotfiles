@@ -17,6 +17,14 @@ window:
   #
   # Specified in number of columns/lines, not pixels.
   # If both are `0`, this setting is ignored.
+  #
+  # rjcortese notes:
+  #   MacOS ->
+  #     columns: 100
+  #     lines: 30
+  #   Linux ->
+  #     columns: 140
+  #     lines: 36
   dimensions:
    columns: 100
    lines: 30
@@ -60,7 +68,11 @@ window:
   #
   # Values for `startup_mode` (macOS only):
   #   - SimpleFullscreen
-  #startup_mode: Windowed
+  #
+  #   rjcortese notes:
+  #     MacOS -> Maximized
+  #     Linux -> comment it out
+  #startup_mode: Maximized
 
   # Window title
   #title: Alacritty
@@ -92,10 +104,9 @@ font:
   normal:
     # Font family
     #
-    # Default:
-    #   - (macOS) Menlo
-    #   - (Linux/BSD) monospace
-    #   - (Windows) Consolas
+    # rjcortese notes:
+    #   MacOS -> SF Mono
+    #   Linux -> monospace
     family: SF Mono
 
     # The `style` can be specified to pick a specific face.
@@ -135,6 +146,9 @@ font:
     #style: Bold Italic
 
   # Point size
+  # rjcortese notes:
+  #   MacOS -> 16.0
+  #   Linux -> 12.0
   size: 16.0
 
   # Offset is the extra space around each character. `offset.y` can be thought of
@@ -154,7 +168,11 @@ font:
   #
   # Thin strokes are suitable for retina displays, but for non-retina screens
   # it is recommended to set `use_thin_strokes` to `false`.
-  #use_thin_strokes: true
+  #
+  # rjcortese notes:
+  #   MacOS -> true
+  #   Linux -> comment out
+  # use_thin_strokes: true
 
 # If `true`, bold text is drawn using the bright color variants.
 draw_bold_text_with_bright_colors: false
