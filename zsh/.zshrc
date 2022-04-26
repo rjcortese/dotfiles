@@ -3,7 +3,6 @@ typeset -U PATH path
 
 # determine OS
 [[ `uname` == Darwin ]] && local MacOS
-
 # start tmux
 #
 # different ways to determine if tmux should be started:
@@ -96,7 +95,10 @@ alias grep='grep --colour=auto'
 alias egrep='egrep --colour=auto'
 alias fgrep='fgrep --colour=auto'
 # MacOS has builtin open command
-[[ ! -v MacOS ]] && alias open="xdg-open"
+[[ ! -v MacOS ]] && alias open='xdg-open'
+# MacOS uses not docker for docker
+[[ -v MacOS ]] && alias docker='nerdctl.lima'
+
 
 
 # Theming section
@@ -284,14 +286,6 @@ export PATH="$PATH:/usr/local/go/bin"
 export DENO_INSTALL="$HOME/.deno"
 export PATH="$DENO_INSTALL/bin:$PATH"
 
-# java
-#export PATH="/usr/local/opt/openjdk@8/bin:$PATH"
-
-# nvm
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
 # places to look for libraries on linux, uncomment if need to build some C stuff...
 # LD_LIBRARY_PATH is for linking at runtime
 #export LD_LIBRARY_PATH="/usr/lib:/usr/lib32:/usr/lib64:/home/rjcortese/.local/lib"
@@ -303,3 +297,12 @@ export NVM_DIR="$HOME/.nvm"
 # export LD_LIBRARY_PATH="/usr/local/lib"
 # -I/usr/local/include -L/usr/local/lib -lpostal
 
+# nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# sdkman for java stuff
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"

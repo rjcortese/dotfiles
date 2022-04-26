@@ -71,7 +71,10 @@ Plug 'Valloric/YouCompleteMe', { 'do': function('BuildYCM') }
 
 " ez commenting / uncommenting
 Plug 'tpope/vim-commentary'
+" ez work with different case conventions
 Plug 'tpope/vim-abolish'
+" ez work with surrounding quotes / tags
+Plug 'tpope/vim-surround'
 
 " fast folding
 Plug 'Konfekt/FastFold'
@@ -202,8 +205,8 @@ au BufNewFile,BufRead *.py
     \ set fileformat=unix |
     \ let python_highlight_all = 1 " python syntax highlighting
 
-" Javascript, HTML, CSS, JSON, svelte
-au BufNewFile,BufRead *.js,*.html,*.css,*.json,*.svelte
+" Javascript, HTML, CSS, JSON, svelte, xml
+au BufNewFile,BufRead *.js,*.html,*.css,*.json,*.svelte,*.xml
     \ set tabstop=2 |
     \ set softtabstop=2 |
     \ set shiftwidth=2
