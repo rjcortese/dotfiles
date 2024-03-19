@@ -32,11 +32,58 @@ style = "Block"
 unfocused_hollow = true
 
 [font]
+# Linux
 size = 12.0
+# MacOS
+#size = 16.0
 
 [font.normal]
+# Linux
 family = "monospace"
+# MacOS
+#family = "SF Mono"
 style = "Regular"
+
+# MacOS
+# [[keyboard.bindings]]
+# chars = "\u001Bb"
+# key = "B"
+# mods = "Alt"
+
+# [[keyboard.bindings]]
+# chars = "\u001Bf"
+# key = "F"
+# mods = "Alt"
+
+# [[keyboard.bindings]]
+# chars = "\u001Bd"
+# key = "D"
+# mods = "Alt"
+
+# [[keyboard.bindings]]
+# chars = "\u001By"
+# key = "Y"
+# mods = "Alt"
+
+# [[keyboard.bindings]]
+# chars = "\u001Br"
+# key = "R"
+# mods = "Alt"
+
+# [[keyboard.bindings]]
+# chars = "\u001Bt"
+# key = "T"
+# mods = "Alt"
+
+# [[keyboard.bindings]]
+# chars = "\u001B\u0019"
+# key = "Y"
+# mods = "Alt|Control"
+
+# [[keyboard.bindings]]
+# chars = "\u001B."
+# key = "Period"
+# mods = "Alt"
 
 [mouse]
 hide_when_typing = true
@@ -45,8 +92,12 @@ hide_when_typing = true
 history = 50000
 
 [window.dimensions]
+# Linux
 columns = 140
 lines = 36
+# MacOS
+#columns = 100
+#lines = 30
 
 [window.padding]
 x = 0
