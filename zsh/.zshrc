@@ -2,7 +2,18 @@
 typeset -U PATH path
 
 # determine OS
-[[ `uname` == Darwin ]] && local MacOS
+export OSNAME=$(uname)
+[[ $OSNAME == Darwin ]] && local MacOS
+
+# start ssh-agent
+# do it before tmux because we want tmux to inherit the env vars
+[[ ! -f ~/.ssh/agent ]] && ssh-agent -s >~/.ssh/agent
+eval $(cat ~/.ssh/agent) >/dev/null
+if ! kill -0 $SSH_AGENT_PID 2>/dev/null; then
+    ssh-agent -s >~/.ssh/agent
+    eval $(cat ~/.ssh/agent) >/dev/null
+fi
+
 # start tmux
 #
 # different ways to determine if tmux should be started:
@@ -49,7 +60,7 @@ zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache
 
 HISTFILE=~/.zhistory
-HISTSIZE=1000
+HISTSIZE=10000
 SAVEHIST=500
 
 if [[ -v MacOS ]]; then
@@ -273,7 +284,7 @@ fi
 # for optimized CPython
 #export CFLAGS='-O2'
 
-# poetry
+# poetry and zig things live here
 export PATH="$HOME/.local/bin:$PATH"
 
 # rust
