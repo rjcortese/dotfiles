@@ -89,7 +89,7 @@ style = "Regular"
 hide_when_typing = true
 
 [scrolling]
-history = 50000
+history = 100000
 
 [window.dimensions]
 # Linux
