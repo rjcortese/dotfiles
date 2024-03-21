@@ -60,7 +60,7 @@ zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache
 
 HISTFILE=~/.zhistory
-HISTSIZE=10000
+HISTSIZE=100000
 SAVEHIST=500
 
 if [[ -v MacOS ]]; then
