@@ -8,4 +8,21 @@ return {
     end,
   },
   "tpope/vim-commentary",
+  "tpope/vim-abolish",
+  "tpope/vim-surround",
+  {
+    "christoomey/vim-tmux-navigator",
+    cmd = {
+      "TmuxNavigateLeft",
+      "TmuxNavigateRight",
+      "TmuxNavigateUp",
+      "TmuxNavigateDown",
+    },
+    keys = {
+      { "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
+      { "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+      { "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
+      { "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
+    },
+  },
 }
