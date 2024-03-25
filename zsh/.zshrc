@@ -211,15 +211,19 @@ export LESS=-r
 ## Plugins section:
 
 # try to install needed plugins if we don't have them:
-# if [[ -v MacOS ]]; then
-#     if command -v brew &> /dev/null; then
-#         brew install zsh-syntax-highlighting
-#         brew install zsh-history-substring-search
-#         brew install zsh-autosuggestions
-#     fi
-# else
-#     # TODO install on linux
-# fi
+if [[ -v MacOS ]]; then
+    if command -v brew &> /dev/null; then
+        brew list zsh-syntax-highlighting &> /dev/null || brew install zsh-syntax-highlighting
+        brew list zsh-history-substring-search &> /dev/null || brew install zsh-history-substring-search
+        brew list zsh-autosuggestions &> /dev/null || brew install zsh-autosuggestions
+    fi
+else
+    if command -v pacman &> /dev/null; then
+        pacman -Qs zsh-syntax-highlighting &> /dev/null || sudo pacman -S zsh-syntax-highlighting
+        pacman -Qs zsh-history-substring-search &> /dev/null || sudo pacman -S zsh-history-substring-search
+        pacman -Qs zsh-autosuggestions &> /dev/null || sudo pacman -S zsh-autosuggestions
+    fi
+fi
 
 # Use syntax highlighting
 if [[ -v MacOS ]]; then
