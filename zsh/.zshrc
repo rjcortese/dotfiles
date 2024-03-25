@@ -5,6 +5,13 @@ typeset -U PATH path
 export OSNAME=$(uname)
 [[ $OSNAME == Darwin ]] && local MacOS
 
+# use brew on MacOS
+# programs installed with brew may depend on this... for example tmux
+if [[ -v MacOS ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+    export PATH="$PATH:/opt/homebrew/bin"
+fi
+
 # start ssh-agent
 # do it before tmux because we want tmux to inherit the env vars
 [[ ! -f ~/.ssh/agent ]] && ssh-agent -s >~/.ssh/agent
@@ -65,7 +72,7 @@ SAVEHIST=500
 
 if [[ -v MacOS ]]; then
     # on MacOS, want to use the vim as installed by homebrew
-    export EDITOR=/usr/local/bin/vim
+    export EDITOR=/opt/homebrew/bin/vim
 else
     export EDITOR=/usr/bin/vim
 fi
@@ -108,7 +115,7 @@ alias fgrep='fgrep --colour=auto'
 # MacOS has builtin open command
 [[ ! -v MacOS ]] && alias open='xdg-open'
 # MacOS uses not docker for docker
-[[ -v MacOS ]] && alias docker='nerdctl.lima'
+[[ -v MacOS ]] && alias docker='podman'
 
 
 
@@ -227,7 +234,7 @@ fi
 
 # Use syntax highlighting
 if [[ -v MacOS ]]; then
-    ZSH_SYNTAX_HIGHLIGHTING="/usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+    ZSH_SYNTAX_HIGHLIGHTING="/opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 else
     ZSH_SYNTAX_HIGHLIGHTING="/usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 fi
@@ -239,7 +246,7 @@ fi
 
 # Use history substring search
 if [[ -v MacOS ]]; then
-    ZSH_HISTORY_SUBSTRING_SEARCH="/usr/local/share/zsh-history-substring-search/zsh-history-substring-search.zsh"
+    ZSH_HISTORY_SUBSTRING_SEARCH="/opt/homebrew/share/zsh-history-substring-search/zsh-history-substring-search.zsh"
 else
     ZSH_HISTORY_SUBSTRING_SEARCH="/usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh"
 fi
@@ -259,7 +266,7 @@ fi
 
 # Use autosuggestion
 if [[ -v MacOS ]]; then
-    ZSH_AUTOSUGGESTIONS="/usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+    ZSH_AUTOSUGGESTIONS="/opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 else
     ZSH_AUTOSUGGESTIONS="/usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
 fi
@@ -270,7 +277,6 @@ if [[ -f "$ZSH_AUTOSUGGESTIONS" ]]; then
 else
     echo "No zsh-autosuggestions found!"
 fi
-
 
 ## PATH section and settings specific to certain programs
 # pyenv
