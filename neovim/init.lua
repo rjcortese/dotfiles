@@ -8,7 +8,6 @@ if not vim.fn.exists(vim.g.os) then
   vim.g.os = vim.fn.substitute(vim.fn.system("uname"), "\n", "", "")
 end
 
-
 -- bootstrap lazy.nvim package manager
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -32,6 +31,7 @@ vim.g.loaded_node_provider = 0
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
 
+
 -- allow cursor to move one spot past end of line
 vim.opt.virtualedit:append { "onemore" }
 
@@ -49,6 +49,42 @@ vim.o.clipboard = "unnamedplus"
 -- elseif g:os == "Linux"
 --     set clipboard=unnamedplus
 -- end
+
+-- default tab / space settings
+vim.o.tabstop = 4
+vim.o.expandtab = true
+vim.o.softtabstop = 4
+vim.o.shiftwidth = 4
+
+-- overrides for filetypes where we want 2 spaces per indent level
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+    pattern = {
+      "*.lua",
+      "*.yml",
+      "*.yaml",
+      "*.js",
+      "*.ts",
+      "*.html",
+      "*.css",
+      "*.json",
+      "*.svelte",
+      "*.xml",
+      "*.c",
+      "*.cc",
+      "*.cxx",
+      "*.h",
+      "*.cpp",
+      "*.hpp",
+      "CMakeLists.txt",
+    },
+    callback = function()
+      vim.o.tabstop = 2
+      vim.o.expandtab = true
+      vim.o.softtabstop = 2
+      vim.o.shiftwidth = 2
+    end,
+  }
+)
 
 -- keep the cursor line centered vertically 
 vim.keymap.set({ "n", "x" }, "j", "jzz")
