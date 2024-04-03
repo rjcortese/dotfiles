@@ -10,6 +10,7 @@ return {
   "tpope/vim-commentary",
   "tpope/vim-abolish",
   "tpope/vim-surround",
+  "tpope/vim-obsession",
   {
     "christoomey/vim-tmux-navigator",
     cmd = {
@@ -24,5 +25,9 @@ return {
       { "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
       { "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
     },
+  },
+  {
+    "solarnz/thrift.vim",
+    ft = "thrift",
   },
 }
