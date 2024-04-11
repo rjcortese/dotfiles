@@ -1,17 +1,21 @@
 -- a peachy nvim config
 
+-- shortcuts for common things
+local map = vim.keymap.set
+local fn = vim.fn
+
 -- identify the os
 -- result will be:
 --   "Darwin" on MacOS
 --   "Linux" on Linux
-if not vim.fn.exists(vim.g.os) then
-  vim.g.os = vim.fn.substitute(vim.fn.system("uname"), "\n", "", "")
+if not fn.exists(vim.g.os) then
+  vim.g.os = fn.substitute(fn.system("uname"), "\n", "", "")
 end
 
 -- bootstrap lazy.nvim package manager
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+local lazypath = fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
+  fn.system({
     "git",
     "clone",
     "--filter=blob:none",
@@ -24,6 +28,38 @@ vim.opt.rtp:prepend(lazypath)
 
 -- setup our plugins
 require("lazy").setup("plugins")
+require("mason").setup({
+  ui = {
+    icons = {
+      package_installed = "✓",
+    },
+  },
+})
+require("mason-lspconfig").setup()
+require("lspconfig").lua_ls.setup({
+  on_init = function (client)
+    local path = client.workspace_folders[1].name
+    if vim.loop.fs_stat(path.."/.luarc.json") or vim.loop.fs_stat(path.."/.luarc.jsonc") then
+      return
+    end
+
+    client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
+      runtime = {
+        version = "LuaJIT"
+      },
+      workspace = {
+        checkThirdParty = false,
+        library = {
+          vim.env.VIMRUNTIME
+        }
+      },
+    })
+  end,
+  settings = {
+    Lua = {}
+  }
+})
+require("lspconfig").pyright.setup({})
 
 -- disable all providers
 vim.g.loaded_python3_provider = 0
@@ -86,12 +122,75 @@ vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
   }
 )
 
+-- idk what it does, cargo culted -- maybe it disables builtin
+-- omnifunc since we use a plugin for autocomplete instead
+vim.opt_global.completeopt = { "menuone", "noinsert", "noselect" }
+
 -- keep the cursor line centered vertically 
-vim.keymap.set({ "n", "x" }, "j", "jzz")
-vim.keymap.set({ "n", "x" }, "k", "kzz")
-vim.keymap.set({ "n", "x" }, "G", "Gzz")
-vim.keymap.set("n", "{", "{zz")
-vim.keymap.set("n", "}", "}zz")
-vim.keymap.set("n", "n", "nzz")
-vim.keymap.set("n", "N", "Nzz")
-vim.keymap.set("n", "%", "%zz")
+map({ "n", "x" }, "j", "jzz")
+map({ "n", "x" }, "k", "kzz")
+map({ "n", "x" }, "G", "Gzz")
+map("n", "{", "{zz")
+map("n", "}", "}zz")
+map("n", "n", "nzz")
+map("n", "N", "Nzz")
+map("n", "%", "%zz")
+
+-- See `:help vim.diagnostic.*` for documentation on any of the
+-- below functions
+map("n", "<leader>e", vim.diagnostic.open_float)
+map("n", "[d", vim.diagnostic.goto_prev)
+map("n", "]d", vim.diagnostic.goto_next)
+-- buffer diagnostics only
+map("n", "<leader>d", vim.diagnostic.setloclist)
+-- all workspace diagnostics
+map("n", "<leader>aa", vim.diagnostic.setqflist)
+-- all workspace errors
+map("n", "<leader>ae", function()
+  vim.diagnostic.setqflist({ severity = "E" })
+end)
+-- all workspace warnings
+map("n", "<leader>aw", function()
+  vim.diagnostic.setqflist({ severity = "W" })
+end)
+map("n", "[c", function()
+  vim.diagnostic.goto_prev({ wrap = false })
+end)
+map("n", "]c", function()
+  vim.diagnostic.goto_next({ wrap = false })
+end)
+
+-- Use LspAttach autocommand to only map the following keys
+-- after the language server attaches to the current buffer
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+  callback = function(ev)
+    -- Enable completion triggered by <c-x><c-o>
+    vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
+
+    -- Buffer local mappings.
+    -- See `:help vim.lsp.*` for documentation on any of the below
+    -- functions
+    local opts = { buffer = ev.buf }
+    map("n", "gD", vim.lsp.buf.declaration, opts)
+    map("n", "gd", vim.lsp.buf.definition, opts)
+    map("n", "K", vim.lsp.buf.hover, opts)
+    map("n", "gi", vim.lsp.buf.implementation, opts)
+    map("n", "gr", vim.lsp.buf.references, opts)
+    map("n", "gds", vim.lsp.buf.document_symbol, opts)
+    map("n", "gws", vim.lsp.buf.workspace_symbol, opts)
+    map("n", "<leader>sh", vim.lsp.buf.signature_help, opts)
+    map("n", "<leader>D", vim.lsp.buf.type_definition, opts)
+    map("n", "<leader>rn", vim.lsp.buf.rename, opts)
+    map("n", "<leader>cl", vim.lsp.codelens.run)
+    map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
+    map("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, opts)
+    map("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, opts)
+    map("n", "<leader>wl", function()
+      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+    end, opts)
+    map("n", "<leader>f", function()
+      vim.lsp.buf.format { async = true }
+    end, opts)
+  end,
+})
