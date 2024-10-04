@@ -70,12 +70,8 @@ HISTFILE=~/.zhistory
 HISTSIZE=100000
 SAVEHIST=500
 
-if [[ -v MacOS ]]; then
-    # on MacOS, want to use the vim as installed by homebrew
-    export EDITOR=/opt/homebrew/bin/vim
-else
-    export EDITOR=/usr/bin/vim
-fi
+# install nvim or this won't work :)
+export EDITOR=$(command -v nvim)
 WORDCHARS=${WORDCHARS//\/[&.;]}                                 # Don't consider certain characters part of the word
 
 
@@ -223,21 +219,30 @@ if [[ -v MacOS ]]; then
         brew list zsh-syntax-highlighting &> /dev/null || brew install zsh-syntax-highlighting
         brew list zsh-history-substring-search &> /dev/null || brew install zsh-history-substring-search
         brew list zsh-autosuggestions &> /dev/null || brew install zsh-autosuggestions
+
+        ZSH_PLUGIN_DIR="/opt/homebrew/share"
     fi
 else
+    # Manjaro (arch based) :)
     if command -v pacman &> /dev/null; then
         pacman -Qs zsh-syntax-highlighting &> /dev/null || sudo pacman -S zsh-syntax-highlighting
         pacman -Qs zsh-history-substring-search &> /dev/null || sudo pacman -S zsh-history-substring-search
         pacman -Qs zsh-autosuggestions &> /dev/null || sudo pacman -S zsh-autosuggestions
+
+        ZSH_PLUGIN_DIR="/usr/share/zsh/plugins"
+
+    # Asahi (fedora based) :)
+    elif command -v dnf &> /dev/null; then
+        dnf list installed zsh-syntax-highlighting &> /dev/null || sudo dnf install zsh-syntax-highlighting
+        # this doesn't exist for fedora
+        # dnf list installed zsh-history-substring-search &> /dev/null || sudo dnf install zsh-history-substring-search
+        dnf list installed zsh-autosuggestions &> /dev/null || sudo dnf install zsh-autosuggestions
+
+        ZSH_PLUGIN_DIR="/usr/share"
     fi
 fi
 
-# Use syntax highlighting
-if [[ -v MacOS ]]; then
-    ZSH_SYNTAX_HIGHLIGHTING="/opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-else
-    ZSH_SYNTAX_HIGHLIGHTING="/usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-fi
+ZSH_SYNTAX_HIGHLIGHTING="${ZSH_PLUGIN_DIR}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 if [[ -f "$ZSH_SYNTAX_HIGHLIGHTING" ]]; then
     source "$ZSH_SYNTAX_HIGHLIGHTING"
 else
@@ -245,11 +250,7 @@ else
 fi
 
 # Use history substring search
-if [[ -v MacOS ]]; then
-    ZSH_HISTORY_SUBSTRING_SEARCH="/opt/homebrew/share/zsh-history-substring-search/zsh-history-substring-search.zsh"
-else
-    ZSH_HISTORY_SUBSTRING_SEARCH="/usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh"
-fi
+ZSH_HISTORY_SUBSTRING_SEARCH="${ZSH_PLUGIN_DIR}/zsh-history-substring-search/zsh-history-substring-search.zsh"
 if [[ -f "$ZSH_HISTORY_SUBSTRING_SEARCH" ]]; then
     source "$ZSH_HISTORY_SUBSTRING_SEARCH"
 
@@ -259,17 +260,12 @@ if [[ -f "$ZSH_HISTORY_SUBSTRING_SEARCH" ]]; then
     bindkey "$terminfo[kcud1]" history-substring-search-down
     bindkey '^[[A' history-substring-search-up
     bindkey '^[[B' history-substring-search-down
-
 else
     echo "NO zsh-history-substring-search.zsh found!"
 fi
 
 # Use autosuggestion
-if [[ -v MacOS ]]; then
-    ZSH_AUTOSUGGESTIONS="/opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-else
-    ZSH_AUTOSUGGESTIONS="/usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
-fi
+ZSH_AUTOSUGGESTIONS="${ZSH_PLUGIN_DIR}/zsh-autosuggestions/zsh-autosuggestions.zsh"
 if [[ -f "$ZSH_AUTOSUGGESTIONS" ]]; then
     source "$ZSH_AUTOSUGGESTIONS"
     ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
@@ -280,8 +276,8 @@ fi
 
 ## PATH section and settings specific to certain programs
 # pyenv
-export PATH="$HOME/.pyenv/bin:$PATH"
 if command -v pyenv &> /dev/null; then
+    export PATH="$HOME/.pyenv/bin:$PATH"
     eval "$(pyenv init --path)"
     eval "$(pyenv virtualenv-init -)"
 fi
@@ -294,18 +290,20 @@ fi
 # for optimized CPython
 #export CFLAGS='-O2'
 
-# poetry and zig things live here
-export PATH="$HOME/.local/bin:$PATH"
+# some things (poetry and zig) live in ~/.local/bin
+[[ -d "$HOME/.local/bin" ]] && export PATH="$HOME/.local/bin:$PATH"
 
-# rust
-export PATH="$HOME/.cargo/bin:$PATH"
+# rust things live in ~/.cargo/bin
+[[ -d "$HOME/.cargo/bin" ]] && export PATH="$HOME/.cargo/bin:$PATH"
 
 # go
-export PATH="$PATH:/usr/local/go/bin"
+[[ -d "/usr/local/go/bin" ]] && export PATH="$PATH:/usr/local/go/bin"
 
 # deno
-export DENO_INSTALL="$HOME/.deno"
-export PATH="$DENO_INSTALL/bin:$PATH"
+if command -v deno &>/dev/null; then
+    export DENO_INSTALL="$HOME/.deno"
+    export PATH="$DENO_INSTALL/bin:$PATH"
+fi
 
 # places to look for libraries on linux, uncomment if need to build some C stuff...
 # LD_LIBRARY_PATH is for linking at runtime
@@ -319,11 +317,15 @@ export PATH="$DENO_INSTALL/bin:$PATH"
 # -I/usr/local/include -L/usr/local/lib -lpostal
 
 # nvm
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+if command -v nvm &>/dev/null; then
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+fi
 
 # sdkman for java stuff
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+if command -v sdkman &>/dev/null; then
+    export SDKMAN_DIR="$HOME/.sdkman"
+    [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+fi
