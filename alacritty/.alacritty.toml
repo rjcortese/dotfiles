@@ -91,6 +91,11 @@ hide_when_typing = true
 [scrolling]
 history = 100000
 
+# Only for Laptop with small screen
+#[window]
+#startup_mode = "Maximized"
+# and then comment out the window.dimensions stuff below
+
 [window.dimensions]
 # Linux
 columns = 140
