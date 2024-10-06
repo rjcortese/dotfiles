@@ -276,10 +276,12 @@ fi
 
 ## PATH section and settings specific to certain programs
 # pyenv
-if command -v pyenv &> /dev/null; then
+if [[ -d "$HOME/.pyenv" ]]; then
     export PATH="$HOME/.pyenv/bin:$PATH"
-    eval "$(pyenv init --path)"
-    eval "$(pyenv virtualenv-init -)"
+    if command -v pyenv &>/dev/null; then
+        eval "$(pyenv init --path)"
+        eval "$(pyenv virtualenv-init -)"
+    fi
 fi
 
 # things for building CPython, uncomment when time to install new python versions with pyenv
@@ -300,7 +302,7 @@ fi
 [[ -d "/usr/local/go/bin" ]] && export PATH="$PATH:/usr/local/go/bin"
 
 # deno
-if command -v deno &>/dev/null; then
+if [[ -d "$HOME/.deno" ]]; then
     export DENO_INSTALL="$HOME/.deno"
     export PATH="$DENO_INSTALL/bin:$PATH"
 fi
@@ -317,15 +319,24 @@ fi
 # -I/usr/local/include -L/usr/local/lib -lpostal
 
 # nvm
-if command -v nvm &>/dev/null; then
+if [[ -d "$HOME/.nvm" ]]; then
     export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+    [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"  # This loads nvm
+    [ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+fi
+
+# bun
+if [[ -d "$HOME/.bun" ]]; then
+    export BUN_INSTALL="$HOME/.bun"
+    export PATH="$BUN_INSTALL/bin:$PATH"
+    # bun completions
+    [[ -s "$BUN_INSTALL/_bun" ]] && source "$BUN_INSTALL/_bun"
 fi
 
 # sdkman for java stuff
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-if command -v sdkman &>/dev/null; then
+if [[ -d "$HOME/.sdkman" ]]; then
     export SDKMAN_DIR="$HOME/.sdkman"
-    [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+    [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
 fi
+
