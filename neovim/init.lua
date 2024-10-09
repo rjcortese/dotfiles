@@ -112,6 +112,8 @@ vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
       "*.cpp",
       "*.hpp",
       "CMakeLists.txt",
+      "*.tf",
+      "*.tofu",
     },
     callback = function()
       vim.o.tabstop = 2
