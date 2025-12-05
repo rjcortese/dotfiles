@@ -36,7 +36,7 @@ require("mason").setup({
   },
 })
 require("mason-lspconfig").setup()
-require("lspconfig").lua_ls.setup({
+vim.lsp.config('lua_ls', {
   on_init = function (client)
     local path = client.workspace_folders[1].name
     if vim.loop.fs_stat(path.."/.luarc.json") or vim.loop.fs_stat(path.."/.luarc.jsonc") then
@@ -59,7 +59,7 @@ require("lspconfig").lua_ls.setup({
     Lua = {}
   }
 })
-require("lspconfig").pyright.setup({})
+vim.lsp.enable('pyright')
 
 -- disable all providers
 vim.g.loaded_python3_provider = 0
