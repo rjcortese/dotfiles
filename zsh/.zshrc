@@ -14,11 +14,22 @@ fi
 
 # start ssh-agent
 # do it before tmux because we want tmux to inherit the env vars
-[[ ! -f ~/.ssh/agent ]] && ssh-agent -s >~/.ssh/agent
-eval $(cat ~/.ssh/agent) >/dev/null
+[[ ! -f ~/.ssh/agent/shared_info ]] && ssh-agent -s >~/.ssh/agent/shared_info
+# sometimes it ends up existing but being empty so we do this
+[[ -z $(cat ~/.ssh/agent/shared_info) ]] && ssh-agent -s >~/.ssh/agent/shared_info
+# the agent should be running now so we put add the variables to the environment
+eval $(cat ~/.ssh/agent/shared_info) >/dev/null
 if ! kill -0 $SSH_AGENT_PID 2>/dev/null; then
-    ssh-agent -s >~/.ssh/agent
-    eval $(cat ~/.ssh/agent) >/dev/null
+    ssh-agent -s >~/.ssh/agent/shared_info
+    eval $(cat ~/.ssh/agent/shared_info) >/dev/null
+fi
+
+# set EDITOR before tmux too because we want tmux to inherit it
+if [[ -v MacOS ]]; then
+    # on MacOS, want to use the nvim as installed by homebrew
+    export EDITOR=/usr/local/bin/nvim
+else
+    export EDITOR=/bin/nvim
 fi
 
 # start tmux
@@ -70,8 +81,6 @@ HISTFILE=~/.zhistory
 HISTSIZE=100000
 SAVEHIST=500
 
-# install nvim or this won't work :)
-export EDITOR=$(command -v nvim)
 WORDCHARS=${WORDCHARS//\/[&.;]}                                 # Don't consider certain characters part of the word
 
 
@@ -103,11 +112,14 @@ bindkey '^H' backward-kill-word                                 # delete previou
 bindkey '^[[Z' undo                                             # Shift+tab undo last action
 
 ## Alias section 
-alias cp="cp -i"                                                # Confirm before overwriting something
+alias cp='cp -i'                                                # Confirm before overwriting something
 alias ls='ls --color=auto'
 alias grep='grep --colour=auto'
 alias egrep='egrep --colour=auto'
 alias fgrep='fgrep --colour=auto'
+alias vimdiff='nvim -d'
+alias vim='nvim'
+alias vi='nvim'
 # MacOS has builtin open command
 [[ ! -v MacOS ]] && alias open='xdg-open'
 # MacOS uses not docker for docker
